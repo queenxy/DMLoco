@@ -1,0 +1,81 @@
+defaults:
+  - _self_
+hydra:
+  run:
+    dir: ${logdir}
+_target_: agent.pretrain.train_diffusion_agent.TrainDiffusionAgent
+
+name: ${env}_pre_diffusion_unet_ta${horizon_steps}_td${denoising_steps}
+logdir: ${oc.env:DPPO_LOG_DIR}/aliengo-pretrain/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+train_dataset_path: ${oc.env:DPPO_DATA_DIR}/aliengo/${task}/multi_vel_onehot_300.npz
+val_dataset_path: ${oc.env:DPPO_DATA_DIR}/aliengo/${task}/trotting_clean_50_scaled_val.npz
+
+seed: 42
+device: cuda:0
+task: multi_gait_and_vel
+env: ${task}_dim
+obs_dim: 1470
+action_dim: 12
+denoising_steps: 100
+horizon_steps: 8
+cond_steps: 1
+
+wandb:
+  entity: ${oc.env:DPPO_WANDB_ENTITY}
+  project: aliengo-${task}-pretrain
+  run: ${now:%H-%M-%S}_${name}
+
+train:
+  n_epochs: 12000
+  batch_size: 1024
+  learning_rate: 1e-3
+  weight_decay: 1e-6
+  lr_scheduler:
+    first_cycle_steps: 10000
+    warmup_steps: 100
+    min_lr: 1e-5
+  train_split: 0.1
+  epoch_start_ema: 20
+  update_ema_freq: 10
+  save_model_freq: 500
+  val_freq: 100
+  log_freq: 10
+
+model:
+  _target_: model.diffusion.diffusion.DiffusionModel
+  predict_epsilon: True
+  denoised_clip_value: 1.0
+  network:
+    _target_: model.diffusion.unet.Unet1D
+    diffusion_step_embed_dim: 16
+    dim: 64
+    dim_mults: [1, 2, 4]
+    kernel_size: 5
+    n_groups: 8
+    smaller_encoder: False
+    cond_mlp_dims: [512, 128]
+    cond_predict_scale: True
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    action_dim: ${action_dim}
+  horizon_steps: ${horizon_steps}
+  obs_dim: ${obs_dim}
+  action_dim: ${action_dim}
+  denoising_steps: ${denoising_steps}
+  device: ${device}
+
+ema:
+  decay: 0.995
+
+train_dataset:
+  _target_: agent.dataset.sequence.StitchedSequenceDataset
+  dataset_path: ${train_dataset_path}
+  horizon_steps: ${horizon_steps}
+  cond_steps: ${cond_steps}
+  device: ${device}
+
+val_dataset:
+  _target_: agent.dataset.sequence.StitchedSequenceDataset
+  dataset_path: ${val_dataset_path}
+  horizon_steps: ${horizon_steps}
+  cond_steps: ${cond_steps}
+  device: ${device}

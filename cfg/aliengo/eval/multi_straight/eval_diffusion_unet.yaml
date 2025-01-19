@@ -1,0 +1,71 @@
+defaults:
+  - _self_
+hydra:
+  run:
+    dir: ${logdir}
+_target_: agent.eval.eval_diffusion_agent.EvalDiffusionAgent
+
+name: ${env_name}_eval_diffusion_unt_ta${horizon_steps}_td${denoising_steps}
+logdir: ${oc.env:DPPO_LOG_DIR}/aliengo-eval/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+base_policy_path: ${oc.env:DPPO_LOG_DIR}/aliengo-pretrain/multi_straight_dim_pre_diffusion_unet_ta4_td100/2024-11-07_10-58-59_42/checkpoint/state_8000.pt
+# normalization_path: ${oc.env:DPPO_DATA_DIR}/aliengo/${env.specific.aliengo}_${env.specific.randomness}/normalization.pth
+
+seed: 42
+device: cuda:0
+env_name: aliengo
+obs_dim: 1260
+action_dim: 12
+denoising_steps: 100
+cond_steps: 1
+horizon_steps: 4
+act_steps: 1
+use_ddim: True
+ddim_steps: 5
+
+n_steps: ${eval:'round(${env.max_episode_steps} / ${act_steps})'}
+render_num: 0
+
+env:
+  n_envs: 1
+  name: ${env_name}
+  env_type: aliengo
+  max_episode_steps: 500
+  best_reward_threshold_for_success: 1
+  specific:
+    headless: false
+    num_obs: 42
+    history_len: 30
+    action_scale: 2.5     # we scaled action by 0.1 when collecting data
+    # aliengo: one_leg
+    # randomness: med
+    # normalization_path: ${normalization_path}
+    # obs_steps: ${cond_steps}
+    act_steps: ${act_steps}
+    # sparse_reward: True
+
+model:
+  _target_: model.diffusion.diffusion.DiffusionModel
+  predict_epsilon: True
+  denoised_clip_value: 1.0
+  randn_clip_value: 3
+  #
+  use_ddim: ${use_ddim}
+  ddim_steps: ${ddim_steps}
+  network_path: ${base_policy_path}
+  network:
+    _target_: model.diffusion.unet.Unet1D
+    diffusion_step_embed_dim: 16
+    dim: 64
+    dim_mults: [1, 2, 4]
+    kernel_size: 5
+    n_groups: 8
+    smaller_encoder: False
+    cond_mlp_dims: [512, 128]
+    cond_predict_scale: True
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    action_dim: ${action_dim}
+  horizon_steps: ${horizon_steps}
+  obs_dim: ${obs_dim}
+  action_dim: ${action_dim}
+  denoising_steps: ${denoising_steps}
+  device: ${device}
