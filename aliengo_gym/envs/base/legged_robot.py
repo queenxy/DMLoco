@@ -133,7 +133,7 @@ class LeggedRobot(BaseTask):
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
             self._draw_debug_vis()
 
-        # self._render_headless()
+        self._render_headless()
 
     def check_termination(self):
         """ Check if environments need to be reset
@@ -1633,7 +1633,7 @@ class LeggedRobot(BaseTask):
         return img.reshape([w, h // 4, 4])
 
     def _render_headless(self):
-        if self.record_now and self.complete_video_frames is not None and len(self.complete_video_frames) == 0:
+        if self.record_now:  # and self.complete_video_frames is not None and len(self.complete_video_frames) == 0:
             bx, by, bz = self.root_states[0, 0], self.root_states[0, 1], self.root_states[0, 2]
             self.gym.set_camera_location(self.rendering_camera, self.envs[0], gymapi.Vec3(bx, by - 1.0, bz + 1.0),
                                          gymapi.Vec3(bx, by, bz))

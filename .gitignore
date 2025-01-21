@@ -8,3 +8,5 @@ wandb
 *.pyc
 *.pyo
 __pycache__
+*.out
+*.mp4
