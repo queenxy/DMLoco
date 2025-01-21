@@ -6,8 +6,8 @@ hydra:
 _target_: agent.pretrain.train_diffusion_agent.TrainDiffusionAgent
 
 name: ${env}_pre_diffusion_unet_ta${horizon_steps}_td${denoising_steps}
-logdir: /home/qxy/dmloco/log/aliengo-pretrain/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
-train_dataset_path: /home/qxy/dmloco/data/aliengo/straight_clean.npz
+logdir: /home/qxy/DMLoco/log/aliengo-pretrain/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+train_dataset_path: /home/qxy/DMLoco/data/aliengo/straight_clean.npz
 
 seed: 42
 device: cuda:0
@@ -19,7 +19,7 @@ horizon_steps: 8
 cond_steps: 1
 
 wandb:
-  entity: ${oc.env:DPPO_WANDB_ENTITY}
+  entity: queenxy2002
   project: aliengo-pretrain
   run: ${now:%H-%M-%S}_${name}
 

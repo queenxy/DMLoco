@@ -4,3 +4,7 @@ log
 pretrained
 runs
 wandb
+*.egg-info
+*.pyc
+*.pyo
+__pycache__

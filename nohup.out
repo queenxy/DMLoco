@@ -1,0 +1,15 @@
+wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: | Waiting for wandb.init()...wandb: / Waiting for wandb.init()...wandb: wandb version 0.19.4 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.7
+wandb: Run data is saved locally in /home/qxy/DMLoco/wandb/run-20250121_184205-ahb1jzlz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run 18-41-57_aliengo_pre_diffusion_unet_ta4_td100
+wandb: ⭐️ View project at https://wandb.ai/queenxy2002/aliengo-pretrain
+wandb: 🚀 View run at https://wandb.ai/queenxy2002/aliengo-pretrain/runs/ahb1jzlz
+[2025-01-21 18:42:12,352][model.diffusion.unet][INFO] - Channel dimensions: [(12, 64), (64, 128), (128, 256)]
+[2025-01-21 18:42:12,870][root][INFO] - Number of network parameters: 4615324
+[2025-01-21 18:42:13,161][agent.dataset.sequence][INFO] - Loaded dataset from /home/qxy/DMLoco/data/aliengo/forward_1.0_50.npz
+[2025-01-21 18:42:13,162][agent.dataset.sequence][INFO] - Number of episodes: 48
+[2025-01-21 18:42:13,162][agent.dataset.sequence][INFO] - States shape/type: (torch.Size([24048, 392]), torch.float32)
+[2025-01-21 18:42:13,162][agent.dataset.sequence][INFO] - Actions shape/type: (torch.Size([24048, 12]), torch.float32)
