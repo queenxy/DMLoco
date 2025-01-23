@@ -10,3 +10,5 @@ wandb
 __pycache__
 *.out
 *.mp4
+*.npz
+*.pt

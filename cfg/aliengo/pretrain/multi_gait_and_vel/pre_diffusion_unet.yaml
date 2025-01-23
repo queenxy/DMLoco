@@ -7,10 +7,10 @@ _target_: agent.pretrain.train_diffusion_agent.TrainDiffusionAgent
 
 name: ${env}_pre_diffusion_unet_ta${horizon_steps}_td${denoising_steps}
 logdir: /home/qxy/DMLoco/log/aliengo-pretrain/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
-train_dataset_path: /home/qxy/DMLoco/data/aliengo/forward_1.0_50.npz
+train_dataset_path: /home/qxy/DMLoco/data/aliengo/forward_con_50.npz
 
 seed: 42
-device: cuda:0
+device: cuda:1
 env: aliengo
 obs_dim: 392
 action_dim: 12

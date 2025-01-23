@@ -4,7 +4,7 @@ delay_steps = 0
 history_steps = 8
 obs_length = 49
 
-data = np.load("forward_dis.npz")
+data = np.load("forward_con.npz")
 print(data["states"].shape)
 print(data["actions"].shape)
 print(data["rews"].shape)
@@ -116,4 +116,4 @@ print(obs_history_buf.shape)
 print(traj_lengths)
 print(np.sum(traj_lengths))
 
-np.savez("forward_dis_50.npz",states=obs_history_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)
+np.savez("./data/aliengo/forward_con_50.npz",states=obs_history_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)

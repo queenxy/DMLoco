@@ -115,7 +115,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.rewards.kappa_gait_probs = 0.07
     Cnfg.rewards.gait_force_sigma = 100.
     Cnfg.rewards.gait_vel_sigma = 10.
-    Cnfg.rewards.reward_container_name = "CoRLRewards"
+    Cnfg.rewards.reward_container_name = "VelTrackingRewards"
     Cnfg.rewards.only_positive_rewards = False
     Cnfg.rewards.only_positive_rewards_ji22_style = True
     Cnfg.rewards.sigma_rew_neg = 0.02

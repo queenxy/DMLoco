@@ -820,12 +820,13 @@ class LeggedRobot(BaseTask):
 
         # setting the smaller commands to zero
         self.commands[env_ids, :2] *= (torch.norm(self.commands[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
-        vel_ids = torch.randint_like(env_ids, 0, 3)
-        vel = self.commands[env_ids, vel_ids]
-        self.commands[env_ids, :3] = torch.zeros_like(self.commands[env_ids, :3])
-        self.commands[env_ids, vel_ids] = vel
-        # self.commands[env_ids,0] = 0
-        # self.commands[env_ids,1] = 0
+        # vel_ids = torch.randint_like(env_ids, 0, 3)
+        # vel = self.commands[env_ids, vel_ids]
+        # self.commands[env_ids, :3] = torch.zeros_like(self.commands[env_ids, :3])
+        # self.commands[env_ids, vel_ids] = vel
+        self.commands[env_ids,1] = 0
+        self.commands[env_ids,2] = 0
+        self.commands[env_ids,0] = torch.rand_like(self.commands[env_ids,0])
 
         # reset command sums
         for key in self.command_sums.keys():
@@ -1401,7 +1402,8 @@ class LeggedRobot(BaseTask):
         """
         # reward containers
         from aliengo_gym.envs.rewards.corl_rewards import CoRLRewards
-        reward_containers = {"CoRLRewards": CoRLRewards}
+        from aliengo_gym.envs.rewards.vel_tracking_rewards import VelTrackingRewards
+        reward_containers = {"CoRLRewards": CoRLRewards, "VelTrackingRewards": VelTrackingRewards}
         self.reward_container = reward_containers[self.cfg.rewards.reward_container_name](self)
 
         # remove zero scales + multiply non-zero ones by dt

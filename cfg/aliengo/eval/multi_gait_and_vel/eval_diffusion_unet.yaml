@@ -6,18 +6,18 @@ hydra:
 _target_: agent.eval.eval_diffusion_agent.EvalDiffusionAgent
 
 name: ${env_name}_eval_diffusion_unt_ta${horizon_steps}_td${denoising_steps}
-logdir: ${oc.env:DPPO_LOG_DIR}/aliengo-eval/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
-base_policy_path: ${oc.env:DPPO_LOG_DIR}/aliengo-finetune/aliengo_ft_diffusion_unet_ta8_td100_tdf5/2024-12-21_18-03-17_42/checkpoint/state_1000.pt
+logdir: /home/qxy/DMLoco/log/aliengo-eval/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+base_policy_path: /home/qxy/DMLoco/log/aliengo-pretrain/aliengo_pre_diffusion_unet_ta4_td100/2025-01-21_21-34-34_42/checkpoint/state_10000.pt
 # normalization_path: ${oc.env:DPPO_DATA_DIR}/aliengo/${env.specific.aliengo}_${env.specific.randomness}/normalization.pth
 
 seed: 42
 device: cuda:0
 env_name: aliengo
-obs_dim: 1470
+obs_dim: 392
 action_dim: 12
 denoising_steps: 100
 cond_steps: 1
-horizon_steps: 8
+horizon_steps: 4
 act_steps: 1
 use_ddim: True
 ddim_steps: 5
@@ -32,16 +32,11 @@ env:
   max_episode_steps: 502
   best_reward_threshold_for_success: 0
   specific:
-    headless: false
+    headless: true
     num_obs: 49
-    history_len: 30
+    history_len: 8
     action_scale: 2.5     # we scaled action by 0.1 when collecting data
-    # aliengo: one_leg
-    # randomness: med
-    # normalization_path: ${normalization_path}
-    # obs_steps: ${cond_steps}
     act_steps: ${act_steps}
-    # sparse_reward: True
 
 # model:
 #   _target_: model.diffusion.diffusion.DiffusionModel

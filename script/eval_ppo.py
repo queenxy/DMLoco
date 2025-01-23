@@ -49,7 +49,7 @@ def load_env(headless=False):
     Cfg.domain_rand.randomize_com_displacement = False
 
     Cfg.env.num_recording_envs = 1
-    Cfg.env.num_envs = 10
+    Cfg.env.num_envs = 1
     Cfg.terrain.num_rows = 5
     Cfg.terrain.num_cols = 5
     Cfg.terrain.border_size = 0
@@ -78,7 +78,7 @@ def load_env(headless=False):
 def play_go1(headless=True):
     env, policy = load_env(headless=headless)
 
-    num_eval_steps = 50
+    num_eval_steps = 500
     gaits = {"pronking": [0, 0, 0],
              "trotting": [0.5, 0, 0],
              "bounding": [0, 0.5, 0],
@@ -136,28 +136,26 @@ def play_go1(headless=True):
 
     print("Reward:", sum(r))
 
-    import cv2
-    print(len(env.video_frames))
-    video_writer = cv2.VideoWriter('temp_video.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 50, (360, 240))
-    for frame in env.video_frames:
-        print(frame.shape)
-        image = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        video_writer.write(image)
-    video_writer.release()
+    # import cv2
+    # video_writer = cv2.VideoWriter('temp_video.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 50, (360, 240))
+    # for frame in env.video_frames:
+    #     image = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    #     video_writer.write(image)
+    # video_writer.release()
 
-    import subprocess
-    subprocess.run([
-        "ffmpeg",
-        "-i", "temp_video.mp4",  # 输入文件
-        "-vcodec", "libx264",  # 视频编码格式
-        "-acodec", "aac",  # 音频编码格式
-        "-pix_fmt", "yuv420p",  # 像素格式
-        "-movflags", "+faststart",  # 优化 MP4 文件
-        "video.mp4"  # 输出文件
-    ])
+    # import subprocess
+    # subprocess.run([
+    #     "ffmpeg",
+    #     "-i", "temp_video.mp4",  # 输入文件
+    #     "-vcodec", "libx264",  # 视频编码格式
+    #     "-acodec", "aac",  # 音频编码格式
+    #     "-pix_fmt", "yuv420p",  # 像素格式
+    #     "-movflags", "+faststart",  # 优化 MP4 文件
+    #     "video.mp4"  # 输出文件
+    # ])
 
-    import os
-    os.remove("temp_video.mp4")
+    # import os
+    # os.remove("temp_video.mp4")
 
 if __name__ == '__main__':
     # to see the environment rendering, set headless=False

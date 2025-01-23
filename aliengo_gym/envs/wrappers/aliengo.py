@@ -2,7 +2,7 @@ import gym
 import torch
 import numpy as np
 
-class AliengoRLSimEnvMultiStepWrapper(gym.Wrapper):
+class AliengoILWrapper(gym.Wrapper):
     def __init__(self, env, n_action_steps, num_obs, obs_history_length):
         super().__init__(env)
         self.env = env
@@ -14,7 +14,6 @@ class AliengoRLSimEnvMultiStepWrapper(gym.Wrapper):
         self.num_obs_history = self.obs_history_length * self.num_obs
         self.obs_history = torch.zeros(self.env.num_envs, self.num_obs_history, dtype=torch.float,
                                        device=self.env.device, requires_grad=False)
-        # self.delay_action = [torch.zeros(1,12)] * 3
 
     def step(self, action):
         # privileged information and observation history are stored in info
@@ -54,14 +53,14 @@ class AliengoRLSimEnvMultiStepWrapper(gym.Wrapper):
         return {'state': self.obs_history.clone().cpu().numpy()}
     
     def convert_obs(self, obs):
-        # o = torch.zeros((self.env.num_envs, 49),device=self.env.device)
-        # o[:,0:6] = obs[:,0:6]
-        # o[:,6:42] = obs[:,21:57]
-        # o[:,30:42] *= 10
-        # o[:,42:45] = torch.tensor([2.0, 0.0, 0.01], device=self.env.device)
-        # o[:,-4:] = torch.tensor([1., 0., 0., 0.],device=self.env.device)
-        # return o
+        o = torch.zeros((self.env.num_envs, 49),device=self.env.device)
+        o[:,0:6] = obs[:,0:6]
+        o[:,6:42] = obs[:,21:57]
+        o[:,30:42] *= 10
+        o[:,42:45] = torch.tensor([1.4, 0.0, 0.0], device=self.env.device)
+        o[:,-4:] = torch.tensor([1., 0., 0., 0.],device=self.env.device)
+        return o
 
         # obs[:,-7:-4] = torch.tensor([2.0, 0.0, 0.0], device=self.env.device)
         # obs[:,-4:] = torch.tensor([0., 0., 0., 1.],device=self.env.device)
-        return obs
+        # return obs

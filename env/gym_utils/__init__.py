@@ -110,7 +110,7 @@ def make_async(
         from aliengo_gym.envs.base.legged_robot_config import Cfg
         from aliengo_gym.envs.aliengo.aliengo_config import config_aliengo
         from aliengo_gym.envs.aliengo.velocity_tracking import VelocityTrackingEasyEnv
-        from env.gym_utils.wrapper.aliengo import AliengoRLSimEnvMultiStepWrapper
+        from aliengo_gym.envs.wrappers.aliengo import AliengoILWrapper
 
         config_aliengo(Cfg)
         Cfg.control.action_scale = kwargs.get("action_scale", 2.5)
@@ -124,11 +124,11 @@ def make_async(
             Cfg.terrain.teleport_robots = True
 
         env = VelocityTrackingEasyEnv(sim_device='cuda:0', headless=headless, cfg=Cfg)
-        env = AliengoRLSimEnvMultiStepWrapper(
+        env = AliengoILWrapper(
             env, 
             n_action_steps = act_steps,
-            num_obs=kwargs.get('num_obs', 39), 
-            obs_history_length=kwargs.get('history_len', 30))
+            num_obs=kwargs.get('num_obs', 49), 
+            obs_history_length=kwargs.get('history_len', 8))
 
         return env
 

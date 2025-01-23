@@ -9,44 +9,27 @@ import pickle as pkl
 
 from aliengo_gym.envs import *
 from aliengo_gym.envs.base.legged_robot_config import Cfg
-from aliengo_gym.envs.aliengo.aliengo_config import config_aliengo
 from aliengo_gym.envs.aliengo.velocity_tracking import VelocityTrackingEasyEnv
 
 from tqdm import tqdm
 import random
 
-def load_policy(logdir, actor_critic):
-    # body = torch.jit.load(logdir + '/checkpoints/body_latest.jit')
-    # import os
-    # adaptation_module = torch.jit.load(logdir + '/checkpoints/adaptation_module_latest.jit')
-
-    adaptation_module = actor_critic.adaptation_module
-    body = actor_critic.actor_body
+def load_policy():
+    body = torch.jit.load('./pretrained/body_latest.jit')
+    adaptation_module = torch.jit.load('./pretrained/adaptation_module_latest.jit')
 
     def policy(obs, info={}):
-        i = 0
         latent = adaptation_module.forward(obs["obs_history"].to('cpu'))
         action = body.forward(torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1))
         info['latent'] = latent
-        return action, info
+        return action
 
     return policy
 
 
-def load_env(label, headless=False):
-    dirs = glob.glob(f"./runs/{label}/*")
-    logdir = sorted(dirs)[-1]
-
-    with open(logdir + "/parameters.pkl", 'rb') as file:
-        pkl_cfg = pkl.load(file)
-        print(pkl_cfg.keys())
-        cfg = pkl_cfg["Cfg"]
-        print(cfg.keys())
-
-        for key, value in cfg.items():
-            if hasattr(Cfg, key):
-                for key2, value2 in cfg[key].items():
-                    setattr(getattr(Cfg, key), key2, value2)
+def load_env(headless=False):
+    from aliengo_gym.envs.aliengo.aliengo_config import config_aliengo
+    config_aliengo(Cfg)
 
     # turn off DR for evaluation script
     Cfg.domain_rand.push_robots = False
@@ -80,35 +63,16 @@ def load_env(label, headless=False):
 
     from aliengo_gym.envs.wrappers.history_wrapper import HistoryWrapper
 
-    env = VelocityTrackingEasyEnv(sim_device='cuda:0', headless=False, cfg=Cfg)
+    env = VelocityTrackingEasyEnv(sim_device='cuda:0', headless=True, cfg=Cfg)
     env = HistoryWrapper(env)
 
-    # load policy
-    from aliengo_gym_learn.ppo_cse.actor_critic import ActorCritic
-
-    actor_critic = ActorCritic(env.num_obs,
-                                      env.num_privileged_obs,
-                                      env.num_obs_history,
-                                      env.num_actions,
-                                      ).to("cpu")
-    weights = torch.load(logdir + "/checkpoints/ac_weights_080000.pt")
-    actor_critic.load_state_dict(state_dict=weights)
-
-    policy = load_policy(logdir,actor_critic)
+    policy = load_policy()
 
     return env, policy
 
 
 def play_go1(headless=True):
-
-    from pathlib import Path
-    from aliengo_gym import MINI_GYM_ROOT_DIR
-    import glob
-    import os
-
-    label = "gait-conditioned-agility/2024-12-03/train"
-
-    env, policy = load_env(label, headless=headless)
+    env, policy = load_env(headless=headless)
 
     num_eval_steps = 2000
     num_envs = 16
@@ -132,16 +96,14 @@ def play_go1(headless=True):
     action_buf = np.zeros((num_eval_steps,num_envs, 12))
     rew_buf = np.zeros((num_eval_steps, num_envs, 1))
     done_buf = np.zeros((num_eval_steps, num_envs, 1))
-    latent_buf = np.zeros((num_eval_steps, num_envs, 6))
     cmd_buf = np.zeros((num_eval_steps, num_envs, 15))
 
     for i in tqdm(range(num_eval_steps)):
         obs_buf[i,:,:] = obs["obs_history"].cpu().numpy()
         cmd_buf[i,:,:] = env.commands.cpu().numpy()
         with torch.no_grad():
-            actions, info = policy(obs)
+            actions = policy(obs)
         action_buf[i,:,:] = actions.cpu().numpy()
-        latent_buf[i,:,:] = info['latent'].cpu().numpy()
         # env.commands[:, 0] = x_vel_cmd
         # env.commands[:, 1] = y_vel_cmd
         # env.commands[:, 2] = yaw_vel_cmd
@@ -157,7 +119,7 @@ def play_go1(headless=True):
         rew_buf[i,:,:] = rew.reshape(-1,1).cpu().numpy()
         done_buf[i,:,:] = done.long().reshape(-1,1).cpu().numpy()
 
-    np.savez("forward_dis.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,latent=latent_buf,cmd=cmd_buf)
+    np.savez("forward_con.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,cmd=cmd_buf)
 
 
 
