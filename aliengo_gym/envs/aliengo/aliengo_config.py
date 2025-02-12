@@ -207,7 +207,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.commands.stance_length_range = [0.35, 0.45]
     Cnfg.commands.limit_vel_x = [-5.0, 5.0]
     Cnfg.commands.limit_vel_y = [-0.6, 0.6]
-    Cnfg.commands.limit_vel_yaw = [-5.0, 5.0]
+    Cnfg.commands.limit_vel_yaw = [-0.6, 0.6]
     Cnfg.commands.limit_body_height = [-0.15, 0.05]
     Cnfg.commands.limit_gait_frequency = [2.0, 4.0]
     Cnfg.commands.limit_gait_phase = [0.0, 1.0]

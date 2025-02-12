@@ -7,17 +7,18 @@ _target_: agent.eval.eval_diffusion_agent.EvalDiffusionAgent
 
 name: ${env_name}_eval_diffusion_unt_ta${horizon_steps}_td${denoising_steps}
 logdir: /home/qxy/DMLoco/log/aliengo-eval/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
-base_policy_path: /home/qxy/DMLoco/log/aliengo-pretrain/aliengo_pre_diffusion_unet_ta4_td100/2025-01-21_21-34-34_42/checkpoint/state_10000.pt
+# base_policy_path: /home/qxy/DMLoco/log/aliengo-pretrain/aliengo_pre_diffusion_unet_ta4_td100/2025-02-02_11-23-22_42/checkpoint/state_10000.pt
+base_policy_path: /home/qxy/DMLoco/state_9000.pt
 # normalization_path: ${oc.env:DPPO_DATA_DIR}/aliengo/${env.specific.aliengo}_${env.specific.randomness}/normalization.pth
 
 seed: 42
 device: cuda:0
 env_name: aliengo
-obs_dim: 392
+obs_dim: 1470
 action_dim: 12
 denoising_steps: 100
 cond_steps: 1
-horizon_steps: 4
+horizon_steps: 8
 act_steps: 1
 use_ddim: True
 ddim_steps: 5
@@ -34,60 +35,20 @@ env:
   specific:
     headless: true
     num_obs: 49
-    history_len: 8
+    history_len: 30
     action_scale: 2.5     # we scaled action by 0.1 when collecting data
     act_steps: ${act_steps}
 
-# model:
-#   _target_: model.diffusion.diffusion.DiffusionModel
-#   predict_epsilon: True
-#   denoised_clip_value: 1.0
-#   randn_clip_value: 3
-#   #
-#   use_ddim: ${use_ddim}
-#   ddim_steps: ${ddim_steps}
-#   network_path: ${base_policy_path}
-#   network:
-#     _target_: model.diffusion.unet.Unet1D
-#     diffusion_step_embed_dim: 16
-#     dim: 64
-#     dim_mults: [1, 2, 4]
-#     kernel_size: 5
-#     n_groups: 8
-#     smaller_encoder: False
-#     cond_mlp_dims: [512, 128]
-#     cond_predict_scale: True
-#     cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
-#     action_dim: ${action_dim}
-#   horizon_steps: ${horizon_steps}
-#   obs_dim: ${obs_dim}
-#   action_dim: ${action_dim}
-#   denoising_steps: ${denoising_steps}
-#   device: ${device}
-
 model:
-  _target_: model.diffusion.diffusion_ppo.PPODiffusion
-  # HP to tune
-  gamma_denoising: 0.9
-  clip_ploss_coef: 0.001
-  clip_ploss_coef_base: 0.001
-  clip_ploss_coef_rate: 3
+  _target_: model.diffusion.diffusion.DiffusionModel
+  predict_epsilon: True
+  denoised_clip_value: 1.0
   randn_clip_value: 3
-  min_sampling_denoising_std: 0.04
   #
   use_ddim: ${use_ddim}
   ddim_steps: ${ddim_steps}
-  learn_eta: False
-  eta:
-    base_eta: 1
-    input_dim: ${obs_dim}
-    mlp_dims: [256, 256]
-    action_dim: ${action_dim}
-    min_eta: 0.1
-    max_eta: 1.0
-    _target_: model.diffusion.eta.EtaFixed
   network_path: ${base_policy_path}
-  actor:
+  network:
     _target_: model.diffusion.unet.Unet1D
     diffusion_step_embed_dim: 16
     dim: 64
@@ -97,18 +58,58 @@ model:
     smaller_encoder: False
     cond_mlp_dims: [512, 128]
     cond_predict_scale: True
-    groupnorm_eps: 1e-4
     cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
     action_dim: ${action_dim}
-  critic:
-    _target_: model.common.critic.CriticObs
-    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
-    mlp_dims: [512, 512, 512]
-    activation_type: Mish
-    residual_style: True
-  ft_denoising_steps: ${ddim_steps}
   horizon_steps: ${horizon_steps}
   obs_dim: ${obs_dim}
   action_dim: ${action_dim}
   denoising_steps: ${denoising_steps}
   device: ${device}
+
+# model:
+#   _target_: model.diffusion.diffusion_ppo.PPODiffusion
+#   # HP to tune
+#   gamma_denoising: 0.9
+#   clip_ploss_coef: 0.001
+#   clip_ploss_coef_base: 0.001
+#   clip_ploss_coef_rate: 3
+#   randn_clip_value: 3
+#   min_sampling_denoising_std: 0.04
+#   #
+#   use_ddim: ${use_ddim}
+#   ddim_steps: ${ddim_steps}
+#   learn_eta: False
+#   eta:
+#     base_eta: 1
+#     input_dim: ${obs_dim}
+#     mlp_dims: [256, 256]
+#     action_dim: ${action_dim}
+#     min_eta: 0.1
+#     max_eta: 1.0
+#     _target_: model.diffusion.eta.EtaFixed
+#   network_path: ${base_policy_path}
+#   actor:
+#     _target_: model.diffusion.unet.Unet1D
+#     diffusion_step_embed_dim: 16
+#     dim: 64
+#     dim_mults: [1, 2, 4]
+#     kernel_size: 5
+#     n_groups: 8
+#     smaller_encoder: False
+#     cond_mlp_dims: [512, 128]
+#     cond_predict_scale: True
+#     groupnorm_eps: 1e-4
+#     cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+#     action_dim: ${action_dim}
+#   critic:
+#     _target_: model.common.critic.CriticObs
+#     cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+#     mlp_dims: [512, 512, 512]
+#     activation_type: Mish
+#     residual_style: True
+#   ft_denoising_steps: ${ddim_steps}
+#   horizon_steps: ${horizon_steps}
+#   obs_dim: ${obs_dim}
+#   action_dim: ${action_dim}
+#   denoising_steps: ${denoising_steps}
+#   device: ${device}

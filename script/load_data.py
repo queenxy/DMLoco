@@ -1,6 +1,6 @@
 import numpy as np
 
-data = np.load("forward_con.npz")
+data = np.load("multi_vel.npz")
 print(data["states"].shape)
 print(data["actions"].shape)
 

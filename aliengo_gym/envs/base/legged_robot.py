@@ -820,13 +820,17 @@ class LeggedRobot(BaseTask):
 
         # setting the smaller commands to zero
         self.commands[env_ids, :2] *= (torch.norm(self.commands[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
-        # vel_ids = torch.randint_like(env_ids, 0, 3)
+        # probabilities = torch.tensor([0.4, 0.4, 0.2])
+        # target_shape = env_ids.shape
+        # prob_tensor = probabilities.expand(*target_shape, -1)
+        # vel_ids = torch.multinomial(prob_tensor, num_samples=1, replacement=True).squeeze(-1)
+        # # vel_ids = torch.randint_like(env_ids, 0, 3)
         # vel = self.commands[env_ids, vel_ids]
         # self.commands[env_ids, :3] = torch.zeros_like(self.commands[env_ids, :3])
         # self.commands[env_ids, vel_ids] = vel
-        self.commands[env_ids,1] = 0
-        self.commands[env_ids,2] = 0
-        self.commands[env_ids,0] = torch.rand_like(self.commands[env_ids,0])
+        # self.commands[env_ids,1] = 0.5
+        # self.commands[env_ids,2] = 0
+        # self.commands[env_ids,0] = 0
 
         # reset command sums
         for key in self.command_sums.keys():

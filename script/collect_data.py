@@ -74,7 +74,7 @@ def load_env(headless=False):
 def play_go1(headless=True):
     env, policy = load_env(headless=headless)
 
-    num_eval_steps = 2000
+    num_eval_steps = 20000
     num_envs = 16
     gaits = {"pronking": [0, 0, 0],
              "trotting": [0.5, 0, 0],
@@ -119,7 +119,7 @@ def play_go1(headless=True):
         rew_buf[i,:,:] = rew.reshape(-1,1).cpu().numpy()
         done_buf[i,:,:] = done.long().reshape(-1,1).cpu().numpy()
 
-    np.savez("forward_con.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,cmd=cmd_buf)
+    np.savez("multi_vel.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,cmd=cmd_buf)
 
 
 

@@ -12,3 +12,4 @@ __pycache__
 *.mp4
 *.npz
 *.pt
+*.png

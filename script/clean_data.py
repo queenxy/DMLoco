@@ -4,7 +4,7 @@ delay_steps = 0
 history_steps = 8
 obs_length = 49
 
-data = np.load("forward_con.npz")
+data = np.load("multi_vel.npz")
 print(data["states"].shape)
 print(data["actions"].shape)
 print(data["rews"].shape)
@@ -27,7 +27,7 @@ def get_obs(obs, cmd):
     o = np.zeros(49)
     o[0:6] = obs[0:6]
     o[6:42] = obs[21:57]
-    o[42:45] = cmd[0:3] * np.array([2.0, 2.0, 0.25])
+    o[42:45] = cmd[0:3] * np.array([2.0, 2.0, 2.0])
     if cmd[5] == 0.5:  # trotting
         o[45:49] = [1, 0, 0, 0]
     elif cmd[6] == 0.5:  # bounding
@@ -73,7 +73,7 @@ for j in range(data["states"].shape[1]):
             tra_act.append(action)
             tra_obs_history.append(obs_history)
         elif done == 1:
-            if tra_step > 500 and tra_rew > 3:
+            if tra_step > 500 and tra_rew > 12:
                 # print(tra_obs[0][-39:])
                 obs_buf += tra_obs #[:-delay_steps]
                 act_buf += tra_act
@@ -94,14 +94,14 @@ for j in range(data["states"].shape[1]):
             obs_history = np.zeros((obs_length*history_steps))
             tra_obs_history = []
 
-            if count >= 50:
+            if count >= 300:
                 break
 
         else:
             print("Data Error")
             break
     print(count)
-    if count >= 50:
+    if count >= 300:
                 break
 
 obs_buf = np.array(obs_buf)
@@ -116,4 +116,4 @@ print(obs_history_buf.shape)
 print(traj_lengths)
 print(np.sum(traj_lengths))
 
-np.savez("./data/aliengo/forward_con_50.npz",states=obs_history_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)
+np.savez("./data/aliengo/multi_vel_new_300.npz",states=obs_history_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)
