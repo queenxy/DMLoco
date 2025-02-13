@@ -43,8 +43,9 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
 
     # Environmental settings
     Cnfg.env.num_envs = 4000
-    Cnfg.env.num_observations = 73
-    Cnfg.env.num_scalar_observations = 73
+    Cnfg.env.episode_length_s = 10
+    Cnfg.env.num_observations = 70
+    Cnfg.env.num_scalar_observations = 70
     Cnfg.env.num_privileged_obs = 6
     Cnfg.env.num_observation_history = 30
     Cnfg.env.observe_two_prev_actions = True
@@ -190,7 +191,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.commands.num_ang_vel_bins = 30
     Cnfg.commands.distributional_commands = True
     Cnfg.commands.num_commands = 15
-    Cnfg.commands.resampling_time = 10
+    Cnfg.commands.resampling_time = 5
     Cnfg.commands.lin_vel_x = [-1.0, 1.0]
     Cnfg.commands.lin_vel_y = [-0.6, 0.6]
     Cnfg.commands.ang_vel_yaw = [-0.5, 0.5]

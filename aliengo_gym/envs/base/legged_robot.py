@@ -119,6 +119,7 @@ class LeggedRobot(BaseTask):
         # compute observations, rewards, resets, ...
         self.check_termination()
         self.compute_reward()
+        self.rew_buf += 2.0 * self.time_out_buf.float() - 1.0 * self.reset_buf.float()
         env_ids = self.reset_buf.nonzero(as_tuple=False).flatten()
         self.reset_idx(env_ids)
         self.compute_observations()
@@ -307,7 +308,9 @@ class LeggedRobot(BaseTask):
                                   (self.dof_pos[:, :self.num_actuated_dof] - self.default_dof_pos[:,
                                                                              :self.num_actuated_dof]) * self.obs_scales.dof_pos,
                                   self.dof_vel[:, :self.num_actuated_dof] * self.obs_scales.dof_vel,
-                                  self.actions
+                                  self.actions * 10,
+                                  self.commands[:,0:3] * self.commands_scale[0:3],
+                                  self.gait
                                   ), dim=-1)
         # if self.cfg.env.observe_command and not self.cfg.env.observe_height_command:
         #     self.obs_buf = torch.cat((self.projected_gravity,
@@ -317,26 +320,26 @@ class LeggedRobot(BaseTask):
         #                               self.actions
         #                               ), dim=-1)
 
-        if self.cfg.env.observe_command:
-            self.obs_buf = torch.cat((self.projected_gravity,
-                                      self.commands * self.commands_scale,
-                                      (self.dof_pos[:, :self.num_actuated_dof] - self.default_dof_pos[:,
-                                                                                 :self.num_actuated_dof]) * self.obs_scales.dof_pos,
-                                      self.dof_vel[:, :self.num_actuated_dof] * self.obs_scales.dof_vel,
-                                      self.actions
-                                      ), dim=-1)
+        # if self.cfg.env.observe_command:
+        #     self.obs_buf = torch.cat((self.projected_gravity,
+        #                               self.commands * self.commands_scale,
+        #                               (self.dof_pos[:, :self.num_actuated_dof] - self.default_dof_pos[:,
+        #                                                                          :self.num_actuated_dof]) * self.obs_scales.dof_pos,
+        #                               self.dof_vel[:, :self.num_actuated_dof] * self.obs_scales.dof_vel,
+        #                               self.actions
+        #                               ), dim=-1)
 
-        if self.cfg.env.observe_two_prev_actions:
-            self.obs_buf = torch.cat((self.obs_buf,
-                                      self.last_actions), dim=-1)
+        # if self.cfg.env.observe_two_prev_actions:
+        #     self.obs_buf = torch.cat((self.obs_buf,
+        #                               self.last_actions), dim=-1)
 
-        if self.cfg.env.observe_timing_parameter:
-            self.obs_buf = torch.cat((self.obs_buf,
-                                      self.gait_indices.unsqueeze(1)), dim=-1)
+        # if self.cfg.env.observe_timing_parameter:
+        #     self.obs_buf = torch.cat((self.obs_buf,
+        #                               self.gait_indices.unsqueeze(1)), dim=-1)
 
-        if self.cfg.env.observe_clock_inputs:
-            self.obs_buf = torch.cat((self.obs_buf,
-                                      self.clock_inputs), dim=-1)
+        # if self.cfg.env.observe_clock_inputs:
+        #     self.obs_buf = torch.cat((self.obs_buf,
+        #                               self.clock_inputs), dim=-1)
 
         # if self.cfg.env.observe_desired_contact_states:
         #     self.obs_buf = torch.cat((self.obs_buf,
@@ -353,8 +356,7 @@ class LeggedRobot(BaseTask):
                                           self.obs_buf), dim=-1)
 
         if self.cfg.env.observe_only_ang_vel:
-            self.obs_buf = torch.cat((self.base_ang_vel * torch.tensor([self.obs_scales.ang_vel/10, self.obs_scales.ang_vel/10, self.obs_scales.ang_vel],
-                                                                       device=self.device, requires_grad=False),
+            self.obs_buf = torch.cat((self.base_ang_vel * torch.tensor([self.obs_scales.ang_vel/10, self.obs_scales.ang_vel/10, self.obs_scales.ang_vel],device=self.device),
                                       self.obs_buf), dim=-1)
 
         if self.cfg.env.observe_only_lin_vel:
@@ -766,18 +768,22 @@ class LeggedRobot(BaseTask):
             if self.cfg.commands.gaitwise_curricula:
                 for i, (category, env_ids_in_category) in enumerate(zip(self.category_names, category_env_ids)):
                     if category == "pronk":  # pronking
+                        self.gait[env_ids_in_category, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = (self.commands[env_ids_in_category, 5] / 2 - 0.25) % 1
                         self.commands[env_ids_in_category, 6] = (self.commands[env_ids_in_category, 6] / 2 - 0.25) % 1
                         self.commands[env_ids_in_category, 7] = (self.commands[env_ids_in_category, 7] / 2 - 0.25) % 1
                     elif category == "trot":  # trotting
+                        self.gait[env_ids_in_category, :] = torch.tensor([1, 0, 0, 0], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = self.commands[env_ids_in_category, 5] / 2 + 0.25
                         self.commands[env_ids_in_category, 6] = 0
                         self.commands[env_ids_in_category, 7] = 0
                     elif category == "pace":  # pacing
+                        self.gait[env_ids_in_category, :] = torch.tensor([0, 0, 1, 0], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = 0
                         self.commands[env_ids_in_category, 6] = self.commands[env_ids_in_category, 6] / 2 + 0.25
                         self.commands[env_ids_in_category, 7] = 0
                     elif category == "bound":  # bounding
+                        self.gait[env_ids_in_category, :] = torch.tensor([0, 1, 0, 0], dtype=torch.float, device=self.device)
                         self.commands[env_ids_in_category, 5] = 0
                         self.commands[env_ids_in_category, 6] = 0
                         self.commands[env_ids_in_category, 7] = self.commands[env_ids_in_category, 7] / 2 + 0.25
@@ -820,17 +826,17 @@ class LeggedRobot(BaseTask):
 
         # setting the smaller commands to zero
         self.commands[env_ids, :2] *= (torch.norm(self.commands[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
-        # probabilities = torch.tensor([0.4, 0.4, 0.2])
-        # target_shape = env_ids.shape
-        # prob_tensor = probabilities.expand(*target_shape, -1)
-        # vel_ids = torch.multinomial(prob_tensor, num_samples=1, replacement=True).squeeze(-1)
-        # # vel_ids = torch.randint_like(env_ids, 0, 3)
-        # vel = self.commands[env_ids, vel_ids]
-        # self.commands[env_ids, :3] = torch.zeros_like(self.commands[env_ids, :3])
-        # self.commands[env_ids, vel_ids] = vel
-        # self.commands[env_ids,1] = 0.5
+        probabilities = torch.tensor([0.3, 0.3, 0.3])
+        target_shape = env_ids.shape
+        prob_tensor = probabilities.expand(*target_shape, -1)
+        vel_ids = torch.multinomial(prob_tensor, num_samples=1, replacement=True).squeeze(-1)
+        # vel_ids = torch.randint_like(env_ids, 0, 3)
+        vel = self.commands[env_ids, vel_ids]
+        self.commands[env_ids, :3] = torch.zeros_like(self.commands[env_ids, :3])
+        self.commands[env_ids, vel_ids] = vel
+        # self.commands[env_ids,1] = 0
         # self.commands[env_ids,2] = 0
-        # self.commands[env_ids,0] = 0
+        # self.commands[env_ids,0] = 1.0
 
         # reset command sums
         for key in self.command_sums.keys():
@@ -1083,54 +1089,55 @@ class LeggedRobot(BaseTask):
                                torch.ones(
                                    self.num_actuated_dof) * noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel,
                                torch.zeros(self.num_actions),
+                               torch.zeros(7)
                                ), dim=0)
 
-        if self.cfg.env.observe_command:
-            noise_vec = torch.cat((torch.ones(3) * noise_scales.gravity * noise_level,
-                                   torch.zeros(self.cfg.commands.num_commands),
-                                   torch.ones(
-                                       self.num_actuated_dof) * noise_scales.dof_pos * noise_level * self.obs_scales.dof_pos,
-                                   torch.ones(
-                                       self.num_actuated_dof) * noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel,
-                                   torch.zeros(self.num_actions),
-                                   ), dim=0)
-        if self.cfg.env.observe_two_prev_actions:
-            noise_vec = torch.cat((noise_vec,
-                                   torch.zeros(self.num_actions)
-                                   ), dim=0)
-        if self.cfg.env.observe_timing_parameter:
-            noise_vec = torch.cat((noise_vec,
-                                   torch.zeros(1)
-                                   ), dim=0)
-        if self.cfg.env.observe_clock_inputs:
-            noise_vec = torch.cat((noise_vec,
-                                   torch.zeros(4)
-                                   ), dim=0)
-        if self.cfg.env.observe_vel:
-            noise_vec = torch.cat((torch.ones(3) * noise_scales.lin_vel * noise_level * self.obs_scales.lin_vel,
-                                   torch.ones(3) * noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel,
-                                   noise_vec
-                                   ), dim=0)
+        # if self.cfg.env.observe_command:
+        #     noise_vec = torch.cat((torch.ones(3) * noise_scales.gravity * noise_level,
+        #                            torch.zeros(self.cfg.commands.num_commands),
+        #                            torch.ones(
+        #                                self.num_actuated_dof) * noise_scales.dof_pos * noise_level * self.obs_scales.dof_pos,
+        #                            torch.ones(
+        #                                self.num_actuated_dof) * noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel,
+        #                            torch.zeros(self.num_actions),
+        #                            ), dim=0)
+        # if self.cfg.env.observe_two_prev_actions:
+        #     noise_vec = torch.cat((noise_vec,
+        #                            torch.zeros(self.num_actions)
+        #                            ), dim=0)
+        # if self.cfg.env.observe_timing_parameter:
+        #     noise_vec = torch.cat((noise_vec,
+        #                            torch.zeros(1)
+        #                            ), dim=0)
+        # if self.cfg.env.observe_clock_inputs:
+        #     noise_vec = torch.cat((noise_vec,
+        #                            torch.zeros(4)
+        #                            ), dim=0)
+        # if self.cfg.env.observe_vel:
+        #     noise_vec = torch.cat((torch.ones(3) * noise_scales.lin_vel * noise_level * self.obs_scales.lin_vel,
+        #                            torch.ones(3) * noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel,
+        #                            noise_vec
+        #                            ), dim=0)
             
         if self.cfg.env.observe_only_ang_vel:
             noise_vec = torch.cat((torch.ones(3) * noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel,
                                    noise_vec
                                    ), dim=0)
 
-        if self.cfg.env.observe_only_lin_vel:
-            noise_vec = torch.cat((torch.ones(3) * noise_scales.lin_vel * noise_level * self.obs_scales.lin_vel,
-                                   noise_vec
-                                   ), dim=0)
+        # if self.cfg.env.observe_only_lin_vel:
+        #     noise_vec = torch.cat((torch.ones(3) * noise_scales.lin_vel * noise_level * self.obs_scales.lin_vel,
+        #                            noise_vec
+        #                            ), dim=0)
 
-        if self.cfg.env.observe_yaw:
-            noise_vec = torch.cat((noise_vec,
-                                   torch.zeros(1),
-                                   ), dim=0)
+        # if self.cfg.env.observe_yaw:
+        #     noise_vec = torch.cat((noise_vec,
+        #                            torch.zeros(1),
+        #                            ), dim=0)
 
-        if self.cfg.env.observe_contact_states:
-            noise_vec = torch.cat((noise_vec,
-                                   torch.ones(4) * noise_scales.contact_states * noise_level,
-                                   ), dim=0)
+        # if self.cfg.env.observe_contact_states:
+        #     noise_vec = torch.cat((noise_vec,
+        #                            torch.ones(4) * noise_scales.contact_states * noise_level,
+        #                            ), dim=0)
 
 
         noise_vec = noise_vec.to(self.device)
@@ -1207,6 +1214,7 @@ class LeggedRobot(BaseTask):
         self.last_dof_vel = torch.zeros_like(self.dof_vel)
         self.last_root_vel = torch.zeros_like(self.root_states[:, 7:13])
 
+        self.gait = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False)
 
         self.commands_value = torch.zeros(self.num_envs, self.cfg.commands.num_commands, dtype=torch.float,
                                           device=self.device, requires_grad=False)

@@ -6,12 +6,12 @@ hydra:
 _target_: agent.finetune.train_ppo_diffusion_agent.TrainPPODiffusionAgent
 
 name: ${env_name}_ft_diffusion_unet_ta${horizon_steps}_td${denoising_steps}_tdf${ft_denoising_steps}
-logdir: ${oc.env:DPPO_LOG_DIR}/aliengo-finetune/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
-base_policy_path: ${oc.env:DPPO_LOG_DIR}/aliengo-pretrain/multi_gait_and_vel_dim_pre_diffusion_unet_ta8_td100/2024-12-09_10-22-31_42/checkpoint/state_9000.pt
+logdir: /home/qxy/DMLoco/log/aliengo-finetune/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+base_policy_path: /home/qxy/DMLoco/state_9000.pt  #aliengo-pretrain/multi_gait_and_vel_dim_pre_diffusion_unet_ta8_td100/2024-12-09_10-22-31_42/checkpoint/state_9000.pt
 # normalization_path: ${oc.env:DPPO_DATA_DIR}/furniture/${env.specific.furniture}_${env.specific.randomness}/normalization.pth
 
 seed: 42
-device: cuda:0
+device: cuda:1
 env_name: aliengo
 obs_dim: 1470
 action_dim: 12
@@ -23,7 +23,7 @@ act_steps: 1
 use_ddim: True
 
 env:
-  n_envs: 200
+  n_envs: 2
   name: ${env_name}
   env_type: aliengo
   max_episode_steps: 502
@@ -36,8 +36,8 @@ env:
     act_steps: ${act_steps}
 
 wandb:
-  entity: ${oc.env:DPPO_WANDB_ENTITY}
-  project: aliengo-multi_gait_and_vel
+  entity: queenxy2002
+  project: aliengo-finetune
   run: ${now:%H-%M-%S}_${name}
 
 train:

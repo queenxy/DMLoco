@@ -53,14 +53,14 @@ class AliengoILWrapper(gym.Wrapper):
         return {'state': self.obs_history.clone().cpu().numpy()}
     
     def convert_obs(self, obs):
-        o = torch.zeros((self.env.num_envs, 49),device=self.env.device)
-        o[:,0:6] = obs[:,0:6]
-        o[:,6:42] = obs[:,21:57]
-        o[:,30:42] *= 10
-        o[:,42:45] = torch.tensor([0.0, 1.0, 0.0], device=self.env.device)
-        o[:,-4:] = torch.tensor([1., 0., 0., 0.],device=self.env.device)
-        return o
+        # o = torch.zeros((self.env.num_envs, 49),device=self.env.device)
+        # o[:,0:6] = obs[:,0:6]
+        # o[:,6:42] = obs[:,21:57]
+        # o[:,30:42] *= 10
+        # o[:,42:45] = torch.tensor([0.0, 1.0, 0.0], device=self.env.device)
+        # o[:,-4:] = torch.tensor([1., 0., 0., 0.],device=self.env.device)
+        # return o
 
         # obs[:,-7:-4] = torch.tensor([2.0, 0.0, 0.0], device=self.env.device)
-        # obs[:,-4:] = torch.tensor([0., 0., 0., 1.],device=self.env.device)
-        # return obs
+        obs[:,-4:] = torch.tensor([1., 0., 0., 0.],device=self.env.device)
+        return obs

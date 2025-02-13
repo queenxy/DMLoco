@@ -183,9 +183,9 @@ class TrainPPODiffusionAgent(TrainPPOAgent):
                     )
                 avg_episode_reward = np.mean(episode_reward)
                 avg_best_reward = np.mean(episode_best_reward)
-                success_rate = np.mean(
-                    episode_best_reward >= self.best_reward_threshold_for_success
-                )
+                print(np.sum(firsts_trajs[1:-1,:], axis=0))
+                success_rate = np.mean((np.sum(firsts_trajs[1:-1,:], axis=0) == 0).astype(float))
+                
             else:
                 episode_reward = np.array([])
                 num_episode_finished = 0
