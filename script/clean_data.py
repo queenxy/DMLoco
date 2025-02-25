@@ -116,4 +116,4 @@ print(obs_history_buf.shape)
 print(traj_lengths)
 print(np.sum(traj_lengths))
 
-np.savez("./data/aliengo/multi_vel_new_300.npz",states=obs_history_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)
+# np.savez("./data/aliengo/multi_vel_new_300.npz",states=obs_history_buf,actions=act_buf,images=None,traj_lengths=traj_lengths)

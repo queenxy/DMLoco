@@ -8,17 +8,17 @@ _target_: agent.eval.eval_diffusion_agent.EvalDiffusionAgent
 name: ${env_name}_eval_diffusion_unt_ta${horizon_steps}_td${denoising_steps}
 logdir: /home/qxy/DMLoco/log/aliengo-eval/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
 # base_policy_path: /home/qxy/DMLoco/log/aliengo-pretrain/aliengo_pre_diffusion_unet_ta4_td100/2025-02-02_11-23-22_42/checkpoint/state_10000.pt
-base_policy_path: /home/qxy/DMLoco/state_999.pt
+base_policy_path: /home/qxy/DMLoco/state_900.pt
 # normalization_path: ${oc.env:DPPO_DATA_DIR}/aliengo/${env.specific.aliengo}_${env.specific.randomness}/normalization.pth
 
 seed: 42
 device: cuda:0
 env_name: aliengo
-obs_dim: 1470
+obs_dim: 392
 action_dim: 12
 denoising_steps: 100
 cond_steps: 1
-horizon_steps: 8
+horizon_steps: 4
 act_steps: 1
 use_ddim: True
 ddim_steps: 5
@@ -35,7 +35,7 @@ env:
   specific:
     headless: true
     num_obs: 49
-    history_len: 30
+    history_len: 8
     action_scale: 2.5     # we scaled action by 0.1 when collecting data
     act_steps: ${act_steps}
 

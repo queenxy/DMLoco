@@ -62,5 +62,5 @@ class AliengoILWrapper(gym.Wrapper):
         # return o
 
         # obs[:,-7:-4] = torch.tensor([2.0, 0.0, 0.0], device=self.env.device)
-        obs[:,-4:] = torch.tensor([1., 0., 0., 0.],device=self.env.device)
+        obs[:,-4:] = torch.tensor([0., 0., 0., 1.],device=self.env.device)
         return obs

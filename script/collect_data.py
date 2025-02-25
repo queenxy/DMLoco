@@ -119,7 +119,7 @@ def play_go1(headless=True):
         rew_buf[i,:,:] = rew.reshape(-1,1).cpu().numpy()
         done_buf[i,:,:] = done.long().reshape(-1,1).cpu().numpy()
 
-    np.savez("multi_vel.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,cmd=cmd_buf)
+    np.savez("aliengo_multi_gait.npz",states=obs_buf,actions=action_buf,rews=rew_buf,dones=done_buf,cmd=cmd_buf)
 
 
 

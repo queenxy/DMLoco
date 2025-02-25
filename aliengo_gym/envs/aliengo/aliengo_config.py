@@ -191,7 +191,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.commands.num_ang_vel_bins = 30
     Cnfg.commands.distributional_commands = True
     Cnfg.commands.num_commands = 15
-    Cnfg.commands.resampling_time = 5
+    Cnfg.commands.resampling_time = 10
     Cnfg.commands.lin_vel_x = [-1.0, 1.0]
     Cnfg.commands.lin_vel_y = [-0.6, 0.6]
     Cnfg.commands.ang_vel_yaw = [-0.5, 0.5]

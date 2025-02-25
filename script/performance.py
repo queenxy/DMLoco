@@ -15,6 +15,7 @@ from omegaconf import OmegaConf
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+import time
 
 # allows arbitrary python code execution in configs using the ${eval:''} resolver
 OmegaConf.register_new_resolver("eval", eval, replace=True)
@@ -52,6 +53,7 @@ def main(cfg: OmegaConf):
     fail_cout = 0
     tracking_error = np.zeros((agent.n_steps, agent.n_envs))
     # Collect a set of trajectories from env
+    t = []
     for step in range(agent.n_steps):
         if step % 10 == 0:
             print(f"Processed step {step} of {agent.n_steps}")
@@ -61,7 +63,9 @@ def main(cfg: OmegaConf):
                 .float()
                 .to(agent.device)
             }
+            tm = time.time()
             samples = agent.model(cond=cond, deterministic=True)
+            t.append(time.time() - tm)
             output_venv = (
                 samples.trajectories.cpu().numpy()
             )  # n_env x horizon x act
@@ -88,8 +92,9 @@ def main(cfg: OmegaConf):
     mean_90_percent = np.mean(filtered_data)
 
     print("Reward:", np.average(np.sum(reward_trajs,axis=0)))
-    print("Fail count:", fail_cout)
+    print("Success rate:", np.mean((np.sum(firsts_trajs[1:-1,:], axis=0) == 0).astype(float)))
     print("Tracking error:", mean_90_percent)
+    # print(sum(t)/len(t))
 
 if __name__ == "__main__":
     main()

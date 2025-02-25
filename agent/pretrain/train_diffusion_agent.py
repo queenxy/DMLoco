@@ -10,6 +10,7 @@ import numpy as np
 log = logging.getLogger(__name__)
 from util.timer import Timer
 from agent.pretrain.train_agent import PreTrainAgent, batch_to_device
+import torch.nn.functional as F
 
 
 class TrainDiffusionAgent(PreTrainAgent):
@@ -25,10 +26,10 @@ class TrainDiffusionAgent(PreTrainAgent):
 
             # train
             loss_train_epoch = []
+            act_mse_epoch = []
             for batch_train in self.dataloader_train:
                 if self.dataset_train.device == "cpu":
                     batch_train = batch_to_device(batch_train)
-
                 self.model.train()
                 loss_train = self.model.loss(*batch_train)
                 loss_train.backward()
@@ -36,7 +37,14 @@ class TrainDiffusionAgent(PreTrainAgent):
 
                 self.optimizer.step()
                 self.optimizer.zero_grad()
+
+                self.model.eval()
+                act_pred = self.model(batch_train[1])
+                act_mse_epoch.append(F.mse_loss(act_pred[0], batch_train[0]).item())
+
             loss_train = np.mean(loss_train_epoch)
+            act_mse = np.mean(act_mse_epoch)
+            # print(act_mse)
 
             # validate
             loss_val_epoch = []
@@ -74,6 +82,7 @@ class TrainDiffusionAgent(PreTrainAgent):
                     wandb.log(
                         {
                             "loss - train": loss_train,
+                            "act - mse - train": act_mse,
                         },
                         step=self.epoch,
                         commit=True,
