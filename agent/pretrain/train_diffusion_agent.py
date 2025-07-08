@@ -38,12 +38,12 @@ class TrainDiffusionAgent(PreTrainAgent):
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
-                self.model.eval()
-                act_pred = self.model(batch_train[1])
-                act_mse_epoch.append(F.mse_loss(act_pred[0], batch_train[0]).item())
+                # self.model.eval()
+                # act_pred = self.model(batch_train[1])
+                # act_mse_epoch.append(F.mse_loss(act_pred[0], batch_train[0]).item())
 
             loss_train = np.mean(loss_train_epoch)
-            act_mse = np.mean(act_mse_epoch)
+            # act_mse = np.mean(act_mse_epoch)
             # print(act_mse)
 
             # validate
@@ -82,7 +82,7 @@ class TrainDiffusionAgent(PreTrainAgent):
                     wandb.log(
                         {
                             "loss - train": loss_train,
-                            "act - mse - train": act_mse,
+                            # "act - mse - train": act_mse,
                         },
                         step=self.epoch,
                         commit=True,

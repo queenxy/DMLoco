@@ -300,25 +300,29 @@ class Unet1D(nn.Module):
         # encode local features
         h_local = list()
         h = []
+        d = []
         for idx, (resnet, resnet2, downsample) in enumerate(self.down_modules):
             x = resnet(x, global_feature)
             if idx == 0 and len(h_local) > 0:
                 x = x + h_local[0]
             x = resnet2(x, global_feature)
             h.append(x)
+            d.append(x.shape[2])
             x = downsample(x)
 
         for mid_module in self.mid_modules:
             x = mid_module(x, global_feature)
-
+        d.reverse()
         for idx, (resnet, resnet2, upsample) in enumerate(self.up_modules):
             x = torch.cat((x, h.pop()), dim=1)
             x = resnet(x, global_feature)
             if idx == len(self.up_modules) and len(h_local) > 0:
                 x = x + h_local[1]
             x = resnet2(x, global_feature)
-            x = upsample(x)
-
+            if idx<len(d)-1 and d[idx+1] == 1:
+                x = x
+            else:
+                x = upsample(x)
         x = self.final_conv(x)
 
         x = einops.rearrange(x, "b t h -> b h t")

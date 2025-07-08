@@ -143,7 +143,7 @@ def config_aliengo(Cnfg: Union[Cfg, Meta]):
     Cnfg.reward_scales.action_rate = -0.01
     Cnfg.reward_scales.dof_pos_limits = -10.0
 
-    Cnfg.obs_scales.ang_vel = 2.0
+    # Cnfg.obs_scales.ang_vel = 2.0
 
     # Terrain settings
     Cnfg.terrain.border_size = 0.0

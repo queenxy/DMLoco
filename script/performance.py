@@ -81,7 +81,7 @@ def main(cfg: OmegaConf):
         fail_cout += np.sum(terminated_venv | truncated_venv)
 
         measured_vels = agent.venv.env.base_lin_vel[:, :3].cpu().numpy()
-        expect_vels = obs_venv["state"][:, -7:-4]
+        expect_vels = obs_venv["state"][:, -7:-4] * np.array([0.5,0.5,0.5])
         tracking_error[step] = np.linalg.norm(measured_vels - expect_vels, axis=1)**2
         # update for next step
         prev_obs_venv = obs_venv

@@ -7,15 +7,15 @@ _target_: agent.pretrain.train_diffusion_agent.TrainDiffusionAgent
 
 name: ${env}_pre_diffusion_unet_ta${horizon_steps}_td${denoising_steps}
 logdir: /home/qxy/DMLoco/log/aliengo-pretrain/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
-train_dataset_path: /home/qxy/DMLoco/data/aliengo/multi_vel_new_300.npz
+train_dataset_path: /home/qxy/DMLoco/data/aliengo/multi_vel_onehot_300.npz
 
 seed: 42
 device: cuda:1
 env: aliengo
-obs_dim: 392
+obs_dim: 1470
 action_dim: 12
 denoising_steps: 100
-horizon_steps: 4
+horizon_steps: 1
 cond_steps: 1
 
 wandb:
